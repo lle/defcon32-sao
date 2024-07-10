@@ -1,0 +1,9 @@
+../Src/screenBuffer.c:20:9:screen_get_bit	1
+../Src/screenBuffer.c:25:6:screen_set_bit	1
+../Src/screenBuffer.c:30:6:screen_show_letter	3
+../Src/screenBuffer.c:46:6:screen_fill	3
+../Src/screenBuffer.c:57:6:screen_clear	3
+../Src/screenBuffer.c:68:6:screen_interruptUpdate	4
+../Src/screenBuffer.c:94:6:screen_draw_line	11
+../Src/screenBuffer.c:106:6:screen_display_array	3
+../Src/screenBuffer.c:117:6:screen_display_image	4

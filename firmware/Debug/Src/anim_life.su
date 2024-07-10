@@ -1,0 +1,4 @@
+../Src/anim_life.c:27:5:neighbours	32	static
+../Src/anim_life.c:70:6:worldCreation	16	static
+../Src/anim_life.c:84:6:anim_life_setup	16	static
+../Src/anim_life.c:97:6:anim_life_run	40	static

@@ -1,0 +1,5 @@
+../Src/anim_swipe.c:10:6:anim_vertical_run	8	static
+../Src/anim_swipe.c:23:6:anim_rotate_run	8	static
+../Src/anim_swipe.c:46:6:anim_horizontal_run	8	static
+../Src/anim_swipe.c:60:6:anim_diagonal_run	16	static
+../Src/anim_swipe.c:85:6:anim_swipeAll_run	8	static

@@ -1,0 +1,6 @@
+../Src/game_racer.c:23:6:shiftDownObstacle	32	static
+../Src/game_racer.c:35:6:clearTopRow	16	static
+../Src/game_racer.c:44:6:generateNewRow	32	static
+../Src/game_racer.c:75:6:gameRacer_startNewGame	8	static
+../Src/game_racer.c:80:6:updateDifficulty	8	static
+../Src/game_racer.c:93:6:gameRacer_run	8	static

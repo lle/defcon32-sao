@@ -34,7 +34,7 @@
 #include "anim_name.h"
 #include "anim_ball.h"
 #include "anim_life.h"
-
+#include "game_racer.h"
 
 /* USER CODE END Includes */
 
@@ -72,6 +72,70 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+void animationSelector()
+{
+	static uint32_t schedulerTimestamp_updateName = 0;
+	if( HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET )
+	{
+		currentAnimation++;
+		if(currentAnimation == MAX_ANIM_ID)
+			currentAnimation = 0;
+
+		//HAL_Delay(100);
+		while(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)
+		{
+			screen_show_letter((currentAnimation < 9)?(ASCII_ONE + currentAnimation):(ASCII_LOWER_A + currentAnimation - 9));
+			HAL_Delay(100);
+		}
+	}
+
+	switch(currentAnimation)
+	{
+		 case 0:
+			 anim_random_run();
+			 break;
+		 case 1:
+			 if(HAL_GetTick() - schedulerTimestamp_updateName > DELAY_PER_LETTER)
+			 {
+				 schedulerTimestamp_updateName = HAL_GetTick();
+				 anim_name_word("DEFCON32! ");
+			 }
+			 break;
+		 case 2:
+			 anim_horizontal_run();
+			 break;
+		 case 3:
+			 anim_vertical_run();
+			 break;
+		 case 4:
+			 anim_diagonal_run();
+			 break;
+		 case 5:
+			 anim_rotate_run();
+			 break;
+		 case 6:
+			 if(HAL_GetTick() - schedulerTimestamp_updateName > DELAY_PER_LETTER)
+			 {
+				 schedulerTimestamp_updateName = HAL_GetTick();
+				 anim_name_word("RAWR! ^.^ ");
+			 }
+			 break;
+		 case 7:
+			 anim_swipeAll_run();
+			 break;
+		 case 8:
+			 anim_ball_run();
+			 break;
+		 case 9:
+			 anim_life_run();
+			 break;
+		 default:
+			 screen_fill(); HAL_Delay(10);
+			 screen_clear(); HAL_Delay(10);
+			 break;
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -107,8 +171,6 @@ int main(void)
   MX_ADC_Init();
   /* USER CODE BEGIN 2 */
 
-
-
   //Generate seed from floating ADC pin
   HAL_ADC_Start(&hadc);
   uint32_t seed = 0;
@@ -125,8 +187,6 @@ int main(void)
   //start timer for screen refresh
   HAL_TIM_Base_Start_IT(&htim16);
 
-  uint32_t schedulerTimestamp_updateName = 0;
-
   // Initiate matrix for conway
   anim_life_setup();
 
@@ -134,78 +194,25 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
+  uint8_t gameSelector = 0;
+  if( HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET ) //IF button is held during boot, enter different game mode
   {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-
-
-	if( HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET )
-	{
-		currentAnimation++;
-		if(currentAnimation == MAX_ANIM_ID)
-			currentAnimation = 0;
-
-		//HAL_Delay(100);
-		while(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)
-		{
-			screen_show_letter((currentAnimation < 9)?(ASCII_ONE + currentAnimation):(ASCII_LOWER_A + currentAnimation - 9));
-			HAL_Delay(100);
-		}
-	}
-
-
-	switch(currentAnimation)
-	{
-		 case 0:
-			 anim_random_run();
-			 break;
-		 case 1:
-			 if(HAL_GetTick() - schedulerTimestamp_updateName > DELAY_PER_LETTER)
-			 {
-				 schedulerTimestamp_updateName = HAL_GetTick();
-				 anim_name_word("DEFCON31! ");
-			 }
-			 break;
-		 case 2:
-			 anim_horizontal_run();
-			 break;
-		 case 3:
-			 anim_vertical_run();
-			 break;
-		 case 4:
-			 anim_diagonal_run();
-			 break;
-		 case 5:
-			 anim_rotate_run();
-			 break;
-		 case 6:
-			 if(HAL_GetTick() - schedulerTimestamp_updateName > DELAY_PER_LETTER)
-			 {
-				 schedulerTimestamp_updateName = HAL_GetTick();
-				 anim_name_word("RAWR! ^.^ ");
-			 }
-			 break;
-		 case 7:
-			 anim_swipeAll_run();
-			 break;
-		 case 8:
-			 anim_ball_run();
-			 break;
-		 case 9:
-			 anim_life_run();
-			 break;
-		 default:
-			 screen_fill(); HAL_Delay(10);
-			 screen_clear(); HAL_Delay(10);
-			 break;
-
-	}
-
-
+	  gameSelector = 1;
   }
-  /* USER CODE END 3 */
+	/* USER CODE END WHILE */
+
+	/* USER CODE BEGIN 3 */
+  if(gameSelector == 0)
+  {
+	while(1)
+		gameRacer_run();
+  }
+  else
+  {
+	while (1)
+		animationSelector();
+  }
+  	/* USER CODE END 3 */
 }
 
 /**

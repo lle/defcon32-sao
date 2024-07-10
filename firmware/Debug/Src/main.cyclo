@@ -1,0 +1,4 @@
+../Src/main.c:75:6:animationSelector	17
+../Src/main.c:145:5:main	4
+../Src/main.c:222:6:SystemClock_Config	4
+../Src/main.c:270:6:Error_Handler	1

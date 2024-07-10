@@ -1,0 +1,4 @@
+../Src/anim_life.c:27:5:neighbours	26
+../Src/anim_life.c:70:6:worldCreation	4
+../Src/anim_life.c:84:6:anim_life_setup	3
+../Src/anim_life.c:97:6:anim_life_run	21

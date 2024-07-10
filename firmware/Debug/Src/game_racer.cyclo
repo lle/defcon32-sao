@@ -1,0 +1,6 @@
+../Src/game_racer.c:23:6:shiftDownObstacle	3
+../Src/game_racer.c:35:6:clearTopRow	2
+../Src/game_racer.c:44:6:generateNewRow	8
+../Src/game_racer.c:75:6:gameRacer_startNewGame	1
+../Src/game_racer.c:80:6:updateDifficulty	10
+../Src/game_racer.c:93:6:gameRacer_run	4
