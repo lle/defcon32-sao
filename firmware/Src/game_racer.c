@@ -1,24 +1,52 @@
-/*
- * game_racecar.c
- *
- *  Created on: Jul 9, 2024
- *      Author: kitty
- */
-
 #include "screenBuffer.h"
 #include "game_racer.h"
 
-#define CAR_BLINK_RATE 100
+#define CAR_BLINK_RATE 70
 
+void gameRacer_startNewGame(void);
+void initGameOver(uint8_t collision_col, uint8_t collision_row);
 void shiftDownObstacle(void);
 void generateObstacles(uint8_t numOfObstacle);
 void clearTopRow(void);
 void updateDifficulty(void);
+void updateCarPosition(void);
+
 uint16_t gameRacer_refreshInterval = 1200;
 uint32_t gameRacer_level = 0;
 uint8_t gameRacer_obstacleCount = 1;
 uint8_t gameRacer_carPosition = 3;
 
+void gameRacer_startNewGame()
+{
+	gameRacer_refreshInterval = 1200;
+	gameRacer_level = 0;
+	gameRacer_obstacleCount = 1;
+	gameRacer_carPosition = 3;
+}
+
+void initGameOver(uint8_t collision_row, uint8_t collision_col)
+{
+	screen_clear();
+	for(int i=0; i<20; i++)
+	{
+		screen_set_bit(collision_row, collision_col, 1);	//highlight obstacle hit
+		screen_set_bit(7, gameRacer_carPosition, 0);	//highlight car
+		HAL_Delay(CAR_BLINK_RATE);
+		screen_set_bit(collision_row, collision_col, 0);
+		screen_set_bit(7, gameRacer_carPosition, 1);	//highlight obstacle hit
+		HAL_Delay(CAR_BLINK_RATE);
+	}
+
+	for(int i=0; i<4; i++)
+	{
+		screen_fill();
+		HAL_Delay(CAR_BLINK_RATE);
+		screen_clear();
+		HAL_Delay(CAR_BLINK_RATE);
+	}
+
+	gameRacer_startNewGame();
+}
 
 void shiftDownObstacle()
 {
@@ -27,7 +55,16 @@ void shiftDownObstacle()
 		for(int c=0; c<8; c++)	//go from column left to right
 		{
 			uint8_t tempBit = screen_get_bit(r, c);
-			screen_set_bit(r+1, c, tempBit); 	//move pixel down 1 row
+
+			//check if the car collides with the incoming obstacle
+			if(r == 6 && tempBit == 1 && c == gameRacer_carPosition)
+			{
+				initGameOver(r, c);	//collision detected, start game-over animation
+				return;
+			}
+
+			//no collision detected, move pixel down 1 row
+			screen_set_bit(r+1, c, tempBit);
 		}
 	}
 }
@@ -52,7 +89,7 @@ void generateNewRow(uint8_t numOfObstacle)
 	clearTopRow();
 
 	//generate requested number of obstacle
-	int8_t obstaclePosition[2] = {-1,-1};
+	int8_t firstObstaclePos = -1;
 	for(int i=0; i<numOfObstacle; i++)
 	{
 		int8_t tempCol = -1;
@@ -61,20 +98,18 @@ void generateNewRow(uint8_t numOfObstacle)
 			uint8_t random = rand()%8;
 			if(screen_get_bit(0, random) == 0)	//if that pixel is OFF then continue
 			{
-				if(screen_get_bit(0, random-1) == 0) //check there is no ON pixel on the left or else it might lead to unwinnable scenario
+				if(firstObstaclePos != -1) //if there was already a first obstacle generated, we need to check for edge-cases
 				{
-					if(screen_get_bit(0, random+1) == 0) //check there is no ON pixel on the right
-						tempCol = random;								//only then accept the proposed random position of the new obstacle
-				}
+					if(random-firstObstaclePos != -1 && random-firstObstaclePos != 1) 	// only accept the proposed 2nd obstacle
+						tempCol = random;												// if it is not beside an existing one.
+				}																		// (leave at least a 1 pixel gap to avoid un-winnable scenarios)
+				else
+					tempCol = random;
 			}
 		}
 		screen_set_bit(0, tempCol, 1);
+		firstObstaclePos = tempCol;	//save temporarily the position of the first obstacle
 	}
-}
-
-void gameRacer_startNewGame()
-{
-
 }
 
 void updateDifficulty()
@@ -83,11 +118,56 @@ void updateDifficulty()
 	else if	(gameRacer_level == 20) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=900;	}
 	else if	(gameRacer_level == 30) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=800;	}
 	else if	(gameRacer_level == 40) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=700;	}
-	else if	(gameRacer_level == 50) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=600; 	}
-	else if	(gameRacer_level == 60) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=400;	}
-	else if	(gameRacer_level == 70) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=400;	}
-	else if	(gameRacer_level == 80) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=200;	}
-	else if	(gameRacer_level == 90) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=200;	}
+	else if	(gameRacer_level == 50) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=600; 	}
+	else if	(gameRacer_level == 60) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=500;	}
+	else if	(gameRacer_level == 70) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=400;	}
+	else if	(gameRacer_level == 80) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=300;	}
+	else if	(gameRacer_level == 90) 	{ gameRacer_obstacleCount=1; 	gameRacer_refreshInterval=200;	}
+	else if	(gameRacer_level == 100) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=900;	}
+	else if	(gameRacer_level == 110) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=800;	}
+	else if	(gameRacer_level == 120) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=700;	}
+	else if	(gameRacer_level == 130) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=600; 	}
+	else if	(gameRacer_level == 140) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=500;	}
+	else if	(gameRacer_level == 150) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=400;	}
+	else if	(gameRacer_level == 160) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=300;	}
+	else if	(gameRacer_level == 170) 	{ gameRacer_obstacleCount=2; 	gameRacer_refreshInterval=200;	}
+}
+
+void updateCarPosition()
+{
+	if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)
+	{
+		//Check for collision
+		if(screen_get_bit(7, gameRacer_carPosition+1) == 1)
+		{
+			initGameOver(7, gameRacer_carPosition+1);	//collision detected, start game-over animation
+			return;
+		}
+
+		//no collision detected, proceed
+		screen_set_bit(7, gameRacer_carPosition, 0);	//clear pixel in previous car position
+		if(gameRacer_carPosition==7)
+			gameRacer_carPosition = 0; //wrap around to the right side
+		else
+			gameRacer_carPosition++;
+	}
+	/*
+	else if(HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)
+	{
+		//Check for collision
+		if(screen_get_bit(7, gameRacer_carPosition-1) == 1)
+		{
+			initGameOver(7, gameRacer_carPosition+1);	//collision detected, start game-over animation
+			return;
+		}
+
+		//no collision detected, proceed
+		screen_set_bit(7, gameRacer_carPosition, 0);	//clear pixel in previous car position
+		if(gameRacer_carPosition==0)
+			gameRacer_carPosition=7; //wrap around to the left side
+		else
+			gameRacer_carPosition--;
+	}*/
 }
 
 void gameRacer_run()
@@ -105,11 +185,23 @@ void gameRacer_run()
 	if(HAL_GetTick() - ts_blinkingCar > CAR_BLINK_RATE)
 	{
 		ts_blinkingCar = HAL_GetTick();
-		if(screen_get_bit(7, gameRacer_carPosition) == 1)	//IF led is ON then turned it off
-			screen_set_bit(7, gameRacer_carPosition, 0);
+		if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET /*|| HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET*/)
+		{
+			screen_set_bit(7, gameRacer_carPosition, 1);	//force the LED to stay ON when the player is moving the car
+		}
 		else
-			screen_set_bit(7, gameRacer_carPosition, 1);
+		{
+			if(screen_get_bit(7, gameRacer_carPosition) == 1)	//IF led is ON then turned it off
+				screen_set_bit(7, gameRacer_carPosition, 0);
+			else
+				screen_set_bit(7, gameRacer_carPosition, 1);
+		}
+	}
 
+	static uint32_t ts_btnListen = 0;
+	if(HAL_GetTick() - ts_btnListen > 100)
+	{
+		ts_btnListen = HAL_GetTick();
+		updateCarPosition();
 	}
 }
-

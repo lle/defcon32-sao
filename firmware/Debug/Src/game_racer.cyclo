@@ -1,6 +1,8 @@
-../Src/game_racer.c:23:6:shiftDownObstacle	3
-../Src/game_racer.c:35:6:clearTopRow	2
-../Src/game_racer.c:44:6:generateNewRow	8
-../Src/game_racer.c:75:6:gameRacer_startNewGame	1
-../Src/game_racer.c:80:6:updateDifficulty	10
-../Src/game_racer.c:93:6:gameRacer_run	4
+../Src/game_racer.c:19:6:gameRacer_startNewGame	1
+../Src/game_racer.c:27:6:initGameOver	3
+../Src/game_racer.c:51:6:shiftDownObstacle	6
+../Src/game_racer.c:72:6:clearTopRow	2
+../Src/game_racer.c:81:6:generateNewRow	9
+../Src/game_racer.c:115:6:updateDifficulty	18
+../Src/game_racer.c:136:6:updateCarPosition	4
+../Src/game_racer.c:173:6:gameRacer_run	6
