@@ -1,7 +1,15 @@
 #include "screenBuffer.h"
 #include "game_racer.h"
 
+#define DEFAULT_REFRESH_MS 1200
+#define DEFAULT_CAR_POS 3
+#define DEFAULT_OBSTACLE_CNT 1
 #define CAR_BLINK_RATE 70
+#define CAR_ROW_POS 7
+#define CAR_MIN_COL_POS 0
+#define CAR_MAX_COL_POS 7
+#define GAMEOVER_COLLISION_BLINK 20
+#define GAMEOVER_FILLBLINK 4
 
 void gameRacer_startNewGame(void);
 void initGameOver(uint8_t collision_col, uint8_t collision_row);
@@ -11,33 +19,33 @@ void clearTopRow(void);
 void updateDifficulty(void);
 void updateCarPosition(void);
 
-uint16_t gameRacer_refreshInterval = 1200;
+uint16_t gameRacer_refreshInterval = DEFAULT_REFRESH_MS;
 uint32_t gameRacer_level = 0;
-uint8_t gameRacer_obstacleCount = 1;
-uint8_t gameRacer_carPosition = 3;
+uint8_t gameRacer_obstacleCount = DEFAULT_OBSTACLE_CNT;
+uint8_t gameRacer_carPosition = DEFAULT_CAR_POS;
 
 void gameRacer_startNewGame()
 {
-	gameRacer_refreshInterval = 1200;
 	gameRacer_level = 0;
-	gameRacer_obstacleCount = 1;
-	gameRacer_carPosition = 3;
+	gameRacer_obstacleCount = DEFAULT_OBSTACLE_CNT;
+	gameRacer_refreshInterval = DEFAULT_REFRESH_MS;
+	gameRacer_carPosition = DEFAULT_CAR_POS;
 }
 
 void initGameOver(uint8_t collision_row, uint8_t collision_col)
 {
 	screen_clear();
-	for(int i=0; i<20; i++)
+	for(int i=0; i<GAMEOVER_COLLISION_BLINK; i++)
 	{
 		screen_set_bit(collision_row, collision_col, 1);	//highlight obstacle hit
-		screen_set_bit(7, gameRacer_carPosition, 0);	//highlight car
+		screen_set_bit(CAR_ROW_POS, gameRacer_carPosition, 0);	//highlight car
 		HAL_Delay(CAR_BLINK_RATE);
 		screen_set_bit(collision_row, collision_col, 0);
-		screen_set_bit(7, gameRacer_carPosition, 1);	//highlight obstacle hit
+		screen_set_bit(CAR_ROW_POS, gameRacer_carPosition, 1);	//highlight obstacle hit
 		HAL_Delay(CAR_BLINK_RATE);
 	}
 
-	for(int i=0; i<4; i++)
+	for(int i=0; i<GAMEOVER_FILLBLINK; i++)
 	{
 		screen_fill();
 		HAL_Delay(CAR_BLINK_RATE);
@@ -135,39 +143,54 @@ void updateDifficulty()
 
 void updateCarPosition()
 {
-	if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)
+	if(HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)	//move right button
 	{
-		//Check for collision
-		if(screen_get_bit(7, gameRacer_carPosition+1) == 1)
+		//COLLISION CHECK
+		if(gameRacer_carPosition == CAR_MAX_COL_POS)	//edge case: check for collision during wrap-around
 		{
-			initGameOver(7, gameRacer_carPosition+1);	//collision detected, start game-over animation
+			if(screen_get_bit(CAR_ROW_POS, CAR_MIN_COL_POS) == 1)	//collision detected on the other side?
+			{
+				initGameOver(CAR_ROW_POS, CAR_MIN_COL_POS);			//start game-over animation and highlight obstacle X,Y coordinate
+				return;
+			}
+		}
+		else if(screen_get_bit(CAR_ROW_POS, gameRacer_carPosition+1) == 1)
+		{
+			initGameOver(CAR_ROW_POS, gameRacer_carPosition+1);	//collision detected, start game-over animation
 			return;
 		}
 
 		//no collision detected, proceed
-		screen_set_bit(7, gameRacer_carPosition, 0);	//clear pixel in previous car position
-		if(gameRacer_carPosition==7)
-			gameRacer_carPosition = 0; //wrap around to the right side
+		screen_set_bit(CAR_ROW_POS, gameRacer_carPosition, 0);	//clear pixel in previous car position
+		if(gameRacer_carPosition == CAR_MAX_COL_POS)
+			gameRacer_carPosition = CAR_MIN_COL_POS; 			//wrap around to the right side
 		else
 			gameRacer_carPosition++;
 	}
-	/*
-	else if(HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)
+	else if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)	//move left button
 	{
-		//Check for collision
-		if(screen_get_bit(7, gameRacer_carPosition-1) == 1)
+		//CHECK COLLISION
+		if(gameRacer_carPosition == CAR_MIN_COL_POS)	//edge case: check for collision during wrap-around
 		{
-			initGameOver(7, gameRacer_carPosition+1);	//collision detected, start game-over animation
+			if(screen_get_bit(CAR_ROW_POS, CAR_MAX_COL_POS) == 1)	//collision detected on the other side?
+			{
+				initGameOver(CAR_ROW_POS, CAR_MAX_COL_POS);			//start game-over animation and highlight obstacle X,Y coordinate
+				return;
+			}
+		}
+		else if(screen_get_bit(CAR_ROW_POS, gameRacer_carPosition-1) == 1)
+		{
+			initGameOver(CAR_ROW_POS, gameRacer_carPosition-1);	//collision detected, start game-over animation
 			return;
 		}
 
 		//no collision detected, proceed
-		screen_set_bit(7, gameRacer_carPosition, 0);	//clear pixel in previous car position
-		if(gameRacer_carPosition==0)
-			gameRacer_carPosition=7; //wrap around to the left side
+		screen_set_bit(CAR_ROW_POS, gameRacer_carPosition, 0);	//clear pixel in previous car position
+		if(gameRacer_carPosition == CAR_MIN_COL_POS)
+			gameRacer_carPosition = CAR_MAX_COL_POS; 			//wrap around to the left side
 		else
 			gameRacer_carPosition--;
-	}*/
+	}
 }
 
 void gameRacer_run()
@@ -185,16 +208,16 @@ void gameRacer_run()
 	if(HAL_GetTick() - ts_blinkingCar > CAR_BLINK_RATE)
 	{
 		ts_blinkingCar = HAL_GetTick();
-		if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET /*|| HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET*/)
+		if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET || HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)
 		{
-			screen_set_bit(7, gameRacer_carPosition, 1);	//force the LED to stay ON when the player is moving the car
+			screen_set_bit(CAR_ROW_POS, gameRacer_carPosition, 1);	//force the LED to stay ON when the player is moving the car
 		}
 		else
 		{
-			if(screen_get_bit(7, gameRacer_carPosition) == 1)	//IF led is ON then turned it off
-				screen_set_bit(7, gameRacer_carPosition, 0);
+			if(screen_get_bit(CAR_ROW_POS, gameRacer_carPosition) == 1)	//IF led is ON then turned it off
+				screen_set_bit(CAR_ROW_POS, gameRacer_carPosition, 0);
 			else
-				screen_set_bit(7, gameRacer_carPosition, 1);
+				screen_set_bit(CAR_ROW_POS, gameRacer_carPosition, 1);
 		}
 	}
 

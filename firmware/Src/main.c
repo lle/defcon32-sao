@@ -144,6 +144,7 @@ void animationSelector()
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -195,13 +196,12 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint8_t gameSelector = 0;
-  if( HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET ) //IF button is held during boot, enter different game mode
+  if( HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET || HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET ) //IF button is held during boot, enter different game mode
   {
 	  gameSelector = 1;
   }
-	/* USER CODE END WHILE */
-
-	/* USER CODE BEGIN 3 */
+    /* USER CODE END WHILE */
+    /* USER CODE BEGIN 3 */
   if(gameSelector == 0)
   {
 	while(1)
@@ -212,7 +212,7 @@ int main(void)
 	while (1)
 		animationSelector();
   }
-  	/* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**

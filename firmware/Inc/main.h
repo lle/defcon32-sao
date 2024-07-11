@@ -64,6 +64,8 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BTB_Pin GPIO_PIN_6
 #define BTB_GPIO_Port GPIOA
+#define BTA_Pin GPIO_PIN_7
+#define BTA_GPIO_Port GPIOA
 #define LED_P_0_Pin GPIO_PIN_0
 #define LED_P_0_GPIO_Port GPIOB
 #define LED_P_1_Pin GPIO_PIN_1

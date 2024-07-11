@@ -54,11 +54,11 @@ void MX_GPIO_Init(void)
                           |LED_N_7_Pin|LED_P_3_Pin|LED_P_4_Pin|LED_P_5_Pin
                           |LED_P_6_Pin|LED_P_7_Pin|LED_N_0_Pin|LED_N_1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = BTB_Pin;
+  /*Configure GPIO pins : PAPin PAPin */
+  GPIO_InitStruct.Pin = BTB_Pin|BTA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(BTB_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin
                            PBPin PBPin PBPin PBPin */
