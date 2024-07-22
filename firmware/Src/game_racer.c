@@ -143,7 +143,7 @@ void updateDifficulty()
 
 void updateCarPosition()
 {
-	if(HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)	//move right button
+	if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)	//move right button
 	{
 		//COLLISION CHECK
 		if(gameRacer_carPosition == CAR_MAX_COL_POS)	//edge case: check for collision during wrap-around
@@ -167,7 +167,7 @@ void updateCarPosition()
 		else
 			gameRacer_carPosition++;
 	}
-	else if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)	//move left button
+	else if(HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)	//move left button
 	{
 		//CHECK COLLISION
 		if(gameRacer_carPosition == CAR_MIN_COL_POS)	//edge case: check for collision during wrap-around

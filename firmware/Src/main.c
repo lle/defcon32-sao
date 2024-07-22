@@ -48,7 +48,7 @@
 
 #define MAX_ANIM_ID 10
 #define DELAY_PER_LETTER 500
-uint8_t currentAnimation = 0;
+uint8_t currentAnimation = 1;
 
 /* USER CODE END PD */
 
@@ -84,7 +84,20 @@ void animationSelector()
 		//HAL_Delay(100);
 		while(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET)
 		{
-			screen_show_letter((currentAnimation < 9)?(ASCII_ONE + currentAnimation):(ASCII_LOWER_A + currentAnimation - 9));
+			screen_show_letter((currentAnimation < 10)?(ASCII_ZERO + currentAnimation):(ASCII_UPPER_A + currentAnimation - 10));
+			HAL_Delay(100);
+		}
+	}
+	else if( HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET )
+	{
+		currentAnimation--;
+		if(currentAnimation == 0)
+			currentAnimation = MAX_ANIM_ID-1;
+
+		//HAL_Delay(100);
+		while(HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)
+		{
+			screen_show_letter((currentAnimation < 10)?(ASCII_ZERO + currentAnimation):(ASCII_UPPER_A + currentAnimation - 10));
 			HAL_Delay(100);
 		}
 	}
@@ -202,7 +215,7 @@ int main(void)
   }
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
-  if(gameSelector == 0)
+  if(gameSelector == 1)
   {
 	while(1)
 		gameRacer_run();
