@@ -90,9 +90,10 @@ void animationSelector()
 	}
 	else if( HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET )
 	{
-		currentAnimation--;
-		if(currentAnimation == 0)
-			currentAnimation = MAX_ANIM_ID-1;
+    if(currentAnimation == 0)
+      currentAnimation = MAX_ANIM_ID-1;
+    else
+      currentAnimation--;
 
 		//HAL_Delay(100);
 		while(HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET)

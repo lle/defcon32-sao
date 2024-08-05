@@ -5,6 +5,7 @@
 #define DEFAULT_CAR_POS 3
 #define DEFAULT_OBSTACLE_CNT 1
 #define CAR_BLINK_RATE 70
+#define BTN_HOLD_INTERVAL 200
 #define CAR_ROW_POS 7
 #define CAR_MIN_COL_POS 0
 #define CAR_MAX_COL_POS 7
@@ -222,9 +223,25 @@ void gameRacer_run()
 	}
 
 	static uint32_t ts_btnListen = 0;
-	if(HAL_GetTick() - ts_btnListen > 100)
+	static uint8_t btn_isPressed = 0;
+	if(btn_isPressed == 0)
 	{
-		ts_btnListen = HAL_GetTick();
-		updateCarPosition();
+		if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_RESET || HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_RESET) //button press detected
+		{
+			btn_isPressed = 1;
+		}
+	}
+	else if(btn_isPressed == 1)	//decide what happens after the button is pressed. Determine if the user is holding or doing a single-press
+	{
+		if(HAL_GPIO_ReadPin(BTB_GPIO_Port, BTB_Pin) == GPIO_PIN_SET && HAL_GPIO_ReadPin(BTA_GPIO_Port, BTA_Pin) == GPIO_PIN_SET)//if the user releases the button, car-update-position should be immediately available
+		{
+			updateCarPosition();
+			HAL_Delay(1);
+		}
+		else if(HAL_GetTick() - ts_btnListen > BTN_HOLD_INTERVAL)	//if the user holds the buttons, the car-update-position will be called every 200ms
+		{
+			ts_btnListen = HAL_GetTick();
+			updateCarPosition();
+		}
 	}
 }
