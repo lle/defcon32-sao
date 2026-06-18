@@ -1,6 +1,3 @@
-# Video Demo
-[![Youtube](http://i3.ytimg.com/vi/qw46eqpLP1Q/maxresdefault.jpg)](https://www.youtube.com/watch?v=qw46eqpLP1Q)
-
 ## Firmware Structure
 See this readme in this repo: [SAO31](https://github.com/lle/defcon31-addon)
 The foundation firmware is from my SAO from last year. This year's firmware adds an the Racing game mode in addition to the animation/screensaver mode.
